@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IR Sensor Data</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 600px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+  <h1>IR Sensor Data</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Value</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
+    <tbody id="data-table">
+      <tr><td colspan="3">Loading...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    async function fetchData() {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/get-data');
+        if (!response.ok) throw new Error('Failed to fetch data');
+        const data = await response.json();
+
+        const tableBody = document.getElementById('data-table');
+        tableBody.innerHTML = '';
+
+        if (data.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="3">No data available</td></tr>';
+          return;
+        }
+
+        data.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${row.id}</td>
+            <td>${row.value}</td>
+            <td>${row.timestamp}</td>
+          `;
+          tableBody.appendChild(tr);
+        });
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        document.getElementById('data-table').innerHTML = '<tr><td colspan="3">Error loading data</td></tr>';
+      }
+    }
+
+    setInterval(fetchData, 5000); // Refresh data every 5 seconds
+    fetchData(); // Initial fetch
+  </script>
+</body>
+</html>
